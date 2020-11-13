@@ -103,6 +103,14 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  // service of the UART
+	  // Service of the I2C
+
+	  // Test for led
+	  if (0 == HAL_GPIO_ReadPin(User_Sw1_GPIO_Port, User_Sw1_Pin))
+		  HAL_GPIO_WritePin(UserLED_GPIO_Port, UserLED_Pin, GPIO_PIN_SET);
+	  else
+		  HAL_GPIO_WritePin(UserLED_GPIO_Port, UserLED_Pin, GPIO_PIN_RESET);;
   }
   /* USER CODE END 3 */
 }
