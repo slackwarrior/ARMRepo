@@ -120,6 +120,8 @@ int main(void)
 			HAL_UART_Transmit(&huart1, uartBuff, uart_str_size, 10000);
 		}
 	}
+	uart_str_size = sprintf(uartBuff, "\r\n", i2c_curr_addr);
+				HAL_UART_Transmit(&huart1, uartBuff, uart_str_size, 10000);
 	/* USER CODE END 2 */
 
   /* Infinite loop */
