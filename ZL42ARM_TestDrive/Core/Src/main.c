@@ -48,6 +48,10 @@
 /* USER CODE BEGIN PV */
 static uint32_t softPrescaler;
 uint8_t uartBuff[50];
+uint8_t uart_str_size;
+
+uint8_t i2c_curr_addr;
+uint8_t i2c_buffer[10];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -93,11 +97,30 @@ int main(void)
   MX_USART1_UART_Init();
   MX_ADC1_Init();
   MX_ADC2_Init();
-  /* USER CODE BEGIN 2 */
+	/* USER CODE BEGIN 2 */
 
-  HAL_GPIO_WritePin(UserLED_GPIO_Port, UserLED_Pin, GPIO_PIN_SET);
-  sprintf(uartBuff, "Test\r\n");
-  /* USER CODE END 2 */
+	// switch off LED
+	HAL_GPIO_WritePin(UserLED_GPIO_Port, UserLED_Pin, GPIO_PIN_SET);
+
+	uart_str_size = sprintf(uartBuff, "I2C Test devices\r\n");
+	HAL_UART_Transmit(&huart1, uartBuff, uart_str_size, 10000);
+
+	uart_str_size = sprintf(uartBuff, "Scanning the bus...\r\n");
+	HAL_UART_Transmit(&huart1, uartBuff, uart_str_size, 10000);
+
+	HAL_StatusTypeDef result;
+	for (i2c_curr_addr = 1; i2c_curr_addr < 128; i2c_curr_addr++) {
+		result = HAL_I2C_IsDeviceReady(&hi2c1, (uint16_t) (i2c_curr_addr << 1),
+				2, 2);
+		if (result != HAL_OK) {
+			uart_str_size = sprintf(uartBuff, ".");
+			HAL_UART_Transmit(&huart1, uartBuff, uart_str_size, 10000);
+		} else {
+			uart_str_size = sprintf(uartBuff, " 0x%X ", i2c_curr_addr);
+			HAL_UART_Transmit(&huart1, uartBuff, uart_str_size, 10000);
+		}
+	}
+	/* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -106,12 +129,13 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		if (softPrescaler < 1000000) {
+		/* if (softPrescaler < 1000000) {
 			softPrescaler++;
 		} else {
 			softPrescaler = 0;
-			HAL_UART_Transmit(&huart1, uartBuff, 6, 10000);
-		}
+
+		}*/
+
 	}
   /* USER CODE END 3 */
 }
