@@ -34,6 +34,32 @@ extern "C" {
 extern I2C_HandleTypeDef hi2c1;
 
 /* USER CODE BEGIN Private defines */
+#define I2C_RTC_WRITE_ADDR 0xa0
+#define I2C_RTC_READ_ADDR 0xa1
+
+// Currently unused
+#define I2C_EXPANDER_01_WRITE_ADDR 0x40
+#define I2C_EXPANDER_01_READ_ADDR 0x41
+
+// Only LED, on 3 lowest bits
+#define I2C_EXPANDER_LED_WRITE_ADDR 0x70
+#define I2C_EXPANDER_LED_READ_ADDR 0x71
+
+// P0 -> RS
+// P1 -> RW
+// P2 -> E
+// P3 -> <backlight>
+// P4 -> D4
+// P5 -> D5
+// P6 -> D6
+// P7 -> D7
+
+#define	I2C_EXPANDER_MAX_TIMEOUT	0xffff
+
+// HD44780
+#define I2C_EXPANDER_LCD_DISPLAY_WRITE_ADDR 0x7e
+#define I2C_EXPANDER_LCD_DISPLAY_READ_ADDR 0x7f
+
 
 /* USER CODE END Private defines */
 

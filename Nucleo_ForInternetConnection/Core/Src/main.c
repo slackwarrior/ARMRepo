@@ -36,6 +36,12 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+uint8_t i2c_current_ptr;
+uint8_t i2c_data_to_send;
+uint8_t i2c_current_buffer[256];
+
+uint8_t str_hour_buffer[256];
+uint8_t str_date_buffer[256];
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -71,6 +77,10 @@ int _write(int file, char *ptr, int len)
 	}
 	return len;
 }
+
+void HAL_SYSTICK_Callback(void){
+
+}
 /* USER CODE END 0 */
 
 /**
@@ -78,47 +88,144 @@ int _write(int file, char *ptr, int len)
   * @retval int
   */
 int main(void)
-{
-  /* USER CODE BEGIN 1 */
+ {
+	/* USER CODE BEGIN 1 */
+	uint8_t tmp_val;
+	/* USER CODE END 1 */
 
-  /* USER CODE END 1 */
+	/* MCU Configuration--------------------------------------------------------*/
 
-  /* MCU Configuration--------------------------------------------------------*/
+	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+	HAL_Init();
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+	/* USER CODE BEGIN Init */
 
-  /* USER CODE BEGIN Init */
+	/* USER CODE END Init */
 
-  /* USER CODE END Init */
+	/* Configure the system clock */
+	SystemClock_Config();
 
-  /* Configure the system clock */
-  SystemClock_Config();
+	/* USER CODE BEGIN SysInit */
 
-  /* USER CODE BEGIN SysInit */
+	/* USER CODE END SysInit */
 
-  /* USER CODE END SysInit */
+	/* Initialize all configured peripherals */
+	MX_GPIO_Init();
+	MX_USART2_UART_Init();
+	MX_I2C1_Init();
+	MX_TIM3_Init();
+	/* USER CODE BEGIN 2 */
+	// Timer3 start
+	HAL_TIM_Base_Start(&htim3);
+	/* USER CODE END 2 */
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_USART2_UART_Init();
-  MX_I2C1_Init();
-  MX_TIM3_Init();
-  /* USER CODE BEGIN 2 */
+	/* Infinite loop */
+	/* USER CODE BEGIN WHILE */
+	while (1) {
+		/* USER CODE END WHILE */
 
-  /* USER CODE END 2 */
+		/* USER CODE BEGIN 3 */
+		// Example usage of debugging semihosting, only for standalone STM32 programmer
+		// printf("Test debugging via semihosting\n\n");
+		//  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+		// i2c_data_to_send = 1;
+		// i2c_current_buffer[0] = 7;
+		// HAL_I2C_Master_Transmit(&hi2c1, I2C_EXPANDER_LED_WRITE_ADDR, i2c_current_buffer, 1, HAL_MAX_DELAY);
+		if (1) {
+			i2c_data_to_send = 1;
+			i2c_current_buffer[0] = 0;
+			HAL_I2C_Master_Transmit(&hi2c1, I2C_RTC_WRITE_ADDR,
+					i2c_current_buffer, 1, HAL_MAX_DELAY);
+			HAL_I2C_Master_Receive(&hi2c1, I2C_RTC_WRITE_ADDR,
+					i2c_current_buffer, 0x30, HAL_MAX_DELAY);
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-    /* USER CODE END WHILE */
+			sprintf(str_hour_buffer, "Godzina: %d%d",
+					(i2c_current_buffer[4] & 0xf0) >> 4,
+					(i2c_current_buffer[4] & 0x0f));
+			sprintf(&str_hour_buffer[11], ":%d%d",
+					(i2c_current_buffer[3] & 0xf0) >> 4,
+					(i2c_current_buffer[3] & 0x0f));
+			sprintf(&str_hour_buffer[14], ":%d%d",
+					(i2c_current_buffer[2] & 0xf0) >> 4,
+					(i2c_current_buffer[2] & 0x0f));
+			sprintf(&str_hour_buffer[17], ".%d%d\n",
+					(i2c_current_buffer[1] & 0xf0) >> 4,
+					(i2c_current_buffer[1] & 0x0f));
 
-    /* USER CODE BEGIN 3 */
-	  // printf("Test debugging via semihosting\n\n");
+			sprintf(str_date_buffer, "Data: %d%d/",
+					(i2c_current_buffer[5] & 0x30) >> 4,
+					i2c_current_buffer[5] & 0x0f);
+			sprintf(&str_date_buffer[9], "%d%d/",
+					(i2c_current_buffer[6] & 0x10) >> 4,
+					i2c_current_buffer[6] & 0x0f);
 
+			sprintf(&str_date_buffer[12], "%d%d%d",(i2c_current_buffer[0x10] & 0xf0) >> 4, (i2c_current_buffer[0x10] & 0x0f), (i2c_current_buffer[0x11] & 0xf0) >> 4);
+			sprintf(&str_date_buffer[16], "%d",
+					(i2c_current_buffer[5] & 0xc0) >> 6);
+
+			tmp_val = (i2c_current_buffer[6] & 0xe0) >> 5;
+			switch (tmp_val) {
+			case 0:
+				sprintf(&str_date_buffer[17], " (pon)\n");
+				break;
+			case 1:
+				sprintf(&str_date_buffer[17], " (wt)\n");
+				break;
+			case 2:
+				sprintf(&str_date_buffer[17], " (sr)\n");
+				break;
+			case 3:
+				sprintf(&str_date_buffer[17], " (czw)\n");
+				break;
+			case 4:
+				sprintf(&str_date_buffer[17], " (pt)\n");
+				break;
+			case 5:
+				sprintf(&str_date_buffer[17], " (sob)\n");
+				break;
+			case 6:
+				sprintf(&str_date_buffer[17], " (nd)\n");
+				break;
+			default:
+				break;
+			}
+		} else {	// ew. procedura zapisu
+			if (1) {		// date/time setup (if =1
+				i2c_current_buffer[0] = 0;// adres rejestru do zapisu (zapisuję od 0)
+				i2c_current_buffer[1] = 0x04;// rejestr statusu (adres, 0x000, uaktywniam alarmy)
+				i2c_current_buffer[2] = 0x00;		// rejestr setnych sek
+				i2c_current_buffer[3] = 0x15;		// rejestr sek
+				i2c_current_buffer[4] = 0x08;		// rejestr min
+				i2c_current_buffer[5] = 0x15;		// rejestr godz
+				i2c_current_buffer[6] = 0xc8;		// rejestr roku/daty
+				i2c_current_buffer[7] = 0x88;// rejestr dnia tygodnia/miesiąca
+				i2c_current_buffer[8] = 0;		// rejestr timera
+				i2c_current_buffer[9] = 0;		//
+
+				i2c_current_buffer[0x11] = 0x20;// rejestr dodatkowy, własny - porządkowy numer roku tysiące/setki
+				i2c_current_buffer[0x12] = 0x20;// rejestr dodatkowy, własny - porządkowy numer roku dziesiątki/jednostki
+
+				i2c_current_buffer[0x13] = 'K';
+				i2c_current_buffer[0x14] = 'a';
+				i2c_current_buffer[0x15] = 'r';
+				i2c_current_buffer[0x16] = 'o';
+				i2c_current_buffer[0x17] = 'l';
+				i2c_current_buffer[0x18] = ' ';
+				i2c_current_buffer[0x19] = 'Z';
+				i2c_current_buffer[0x1a] = '.';
+
+				HAL_I2C_Master_Transmit(&hi2c1, I2C_RTC_WRITE_ADDR,
+						i2c_current_buffer, 0x1a, HAL_MAX_DELAY);
+			} else {
+				i2c_current_buffer[0x00] = 0x07;		// Zapis powyżej danej komórki..
+				// i2c_current_buffer[0x01] = ;
+				HAL_I2C_Master_Transmit(&hi2c1, I2C_RTC_WRITE_ADDR,
+										i2c_current_buffer, 0x08, HAL_MAX_DELAY);
+			}
+		}
+		HAL_Delay(300);
 	}
-  /* USER CODE END 3 */
+	/* USER CODE END 3 */
 }
 
 /**
