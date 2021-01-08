@@ -54,6 +54,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+void my_Tim3_Elapsed(void);
 
 /* USER CODE END EFP */
 
