@@ -54,8 +54,8 @@ all: main-build
 main-build: Nucleo_ForInternetConnection.elf secondary-outputs
 
 # Tool invocations
-Nucleo_ForInternetConnection.elf: $(OBJS) $(USER_OBJS) /home/karol/Dokumenty/Projekty/STMCubeMX/Nucleo_ForInternetConnection/STM32F411RETX_FLASH.ld
-	arm-none-eabi-gcc -o "Nucleo_ForInternetConnection.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/karol/Dokumenty/Projekty/STMCubeMX/Nucleo_ForInternetConnection/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Nucleo_ForInternetConnection.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Nucleo_ForInternetConnection.elf: $(OBJS) $(USER_OBJS) /home/karol/git/ARMRepo/Nucleo_ForInternetConnection/STM32F411RETX_FLASH.ld
+	arm-none-eabi-gcc -o "Nucleo_ForInternetConnection.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/karol/git/ARMRepo/Nucleo_ForInternetConnection/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Nucleo_ForInternetConnection.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

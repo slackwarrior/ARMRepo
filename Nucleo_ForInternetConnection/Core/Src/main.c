@@ -20,12 +20,13 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "i2c.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,7 +57,20 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+int __io_putchar(int ch)
+ {
+	ITM_SendChar(ch);
+	return (ch);
+}
 
+int _write(int file, char *ptr, int len)
+ {
+	int DataIdx;
+	for (DataIdx = 0; DataIdx < len; DataIdx++) {
+		__io_putchar(*ptr++);
+	}
+	return len;
+}
 /* USER CODE END 0 */
 
 /**
@@ -89,6 +103,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_I2C1_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -97,9 +112,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-		/* USER CODE END WHILE */
+    /* USER CODE END WHILE */
 
-		/* USER CODE BEGIN 3 */
+    /* USER CODE BEGIN 3 */
+	  // printf("Test debugging via semihosting\n\n");
+
 	}
   /* USER CODE END 3 */
 }
